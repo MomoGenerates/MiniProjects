@@ -37,12 +37,13 @@ public class App {
                         users.add(newUser);
                         userManager.saveUsers(users);
                     }
-                    if(sc.nextLine().equalsIgnoreCase("admin acc")) {
-                        User newUser = new User(true);
-                        newUser.adminCreateAcc(sc);
-                        users.add(newUser);
-                        userManager.saveUsers(users);
-                    }
+                    // admin creation 
+                    // if(sc.nextLine().equalsIgnoreCase("admin acc")) { 
+                    //     User newUser = new User(true);
+                    //     newUser.adminCreateAcc(sc);
+                    //     users.add(newUser);
+                    //     userManager.saveUsers(users);
+                    // }
                 } else UserExist = true;
             }
             

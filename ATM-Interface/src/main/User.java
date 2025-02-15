@@ -68,17 +68,17 @@ public class User implements Serializable {
         this.transactionHistory = new ArrayList<>();
         transactionHistory.add(new Transaction("Deposit", this.balance, "Initial Deposit"));
     }
-    public void adminCreateAcc(Scanner sc){//admin user
-        animate.animateText("Creating a new admin ", 25);
-        animate.animateText("Enter the Name ", 25);
-        this.name = sc.nextLine();
+    // public void adminCreateAcc(Scanner sc){//admin user
+    //     animate.animateText("Creating a new admin ", 25);
+    //     animate.animateText("Enter the Name ", 25);
+    //     this.name = sc.nextLine();
 
-        do {    // Validate the pin
-        animate.animateText("Enter the Pin ", 25);
-        this.pin = sc.nextLine();
-        } while (this.pin.length() != 6);
-        animate.animateText("Admin created successfully ", 25);
-    }
+    //     do {    // Validate the pin
+    //     animate.animateText("Enter the Pin ", 25);
+    //     this.pin = sc.nextLine();
+    //     } while (this.pin.length() != 6);
+    //     animate.animateText("Admin created successfully ", 25);
+    // }
 
     public void deposit(double amount) {
         animate.animateText("Successfully deposited "+amount, 25);
@@ -145,7 +145,7 @@ public class User implements Serializable {
     public String getUserID() { return this.userID; }
     public double getBalance() { return this.balance; }
     public boolean getStatus() { return this.isAccFrozen; }
-    public void setStatus(boolean status) { this.isAccFrozen = status; }
-
     public boolean isAdmin() { return this.isAdmin; }
+    // setters 
+    public void setStatus(boolean status) { this.isAccFrozen = status; }
 }
