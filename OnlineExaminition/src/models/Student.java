@@ -122,7 +122,7 @@ public class Student implements Serializable {
     public String getStudentID(){ return this.studentId; }
     public int getStudentSem(){ return this.sem; }
     public boolean isTeacher(){ return this.isTeacher; }
-    public Integer getExamMark(String examId) { return this.studentMarks.get(examId) != null ? this.studentMarks.get(examId) : 0; }
+    public Integer getExamMark(String examId) { return this.studentMarks.getOrDefault(examId, 0); }
 
     public void addExamMark(String examId, int marks) {
         studentMarks.put(examId, marks);

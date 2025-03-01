@@ -1,41 +1,71 @@
 # Online Examination System
 
-A robust Java-based examination system that allows teachers to create and manage exams while students can take tests in a secure, timed environment.
+A console-based Java examination system that enables teachers to create and manage exams while students can take tests in a secure, timed environment.
 
 ## Features
 
 ### For Teachers
-- Create and manage exams
-- Add, update, or delete questions
-- Set exam duration and marks
-- View detailed exam reports and statistics
-- Track student performance
-- Generate grade distribution analysis
+- Create and manage multiple-choice exams
+- Add questions with options and correct answers
+- Set exam duration and marks per question
+- View student results and performance statistics
 
 ### For Students
-- Take timed exams
-- Real-time countdown timer
-- Automatic submission when time expires
-- View instant results
-- Track performance history
-- Update profile information
+- Take timed exams with real-time countdown
+- Answer multiple-choice questions (a, b, c, d)
+- Receive instant results after submission
+- View performance history
 
-## Technical Features
-- Serializable data persistence
-- Color-coded timer warnings
-- Secure password system
-- Thread-safe exam timing
-- Stream API for efficient data processing
-- Exception handling for robust operation
+## Technical Implementation
+
+- Console-based user interface with enhanced text display
+- Timed exams with automatic submission
+- Secure user authentication system
+- Data persistence using Java serialization
+- Thread-safe operations
 
 ## Project Structure
 
-Key Components:
-- `models/`: Core data structures
-- `util/`: Helper classes and utilities
-- `database/`: Data persistence
-- `App.java`: Application entry point and menu system
+```
+├── .vscode/           # VS Code configuration
+├── bin/               # Compiled classes
+├── database/          # Serialized data storage
+├── src/               # Source code
+│   ├── main/
+│   │   ├── App.java   # Application entry point
+│   │   ├── models/    # Data models
+│   │   │   ├── Exam.java
+│   │   │   ├── Question.java
+│   │   │   └── Student.java
+│   │   └── util/      # Utility classes
+│   │       ├── AnimatedText.java
+│   │       ├── ConsolePrinter.java
+│   │       ├── DatabaseManager.java
+│   │       └── Timer.java
+└── README.md          # Project documentation
+```
 
-## Dependency Management
+## Getting Started
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+1. Ensure you have Java JDK 8 or higher installed
+2. Clone the repository
+3. Compile the project using your Java compiler
+4. Run the application with `java -cp bin main.App`
+
+## Usage
+
+The application provides a text-based menu system for:
+- User login (student/teacher)
+- Exam creation and management
+- Taking exams with a countdown timer
+- Viewing results and statistics
+
+## Technical Notes
+
+- `AnimatedText.java`: Provides text animations for the console interface
+- `ConsolePrinter.java`: Handles formatted console output
+- `DatabaseManager.java`: Manages data persistence through serialization
+- `Timer.java`: Implements countdown functionality for timed exams
+- `Exam.java`: Represents exam structure with questions and settings
+- `Question.java`: Models multiple-choice questions with options
+- `Student.java`: Stores student information and exam results

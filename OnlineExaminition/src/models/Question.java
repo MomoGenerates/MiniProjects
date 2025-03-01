@@ -3,6 +3,7 @@ package models;
 import java.io.Serializable;
 import java.util.Scanner;
 import util.AnimatedText;
+import util.ConsolePrinter;
 
 public class Question implements Serializable {
 
@@ -32,9 +33,12 @@ public class Question implements Serializable {
     }
 
     public synchronized void displayQuestion(AnimatedText animate){
-        animate.animateText(this.questionText + "    " + this.marks +"M", 25);
-        animate.animateText("a." + this.options[0] +"\t"+ "b." + this.options[1], 25);
-        animate.animateText("c." + this.options[2] +"\t"+ "d." + this.options[3], 25);
+        ConsolePrinter.println("\n" + this.questionText + "    " + this.marks +"M" +
+        "\na." + this.options[0] +"\t"+ "b." + this.options[1] +
+        "\nc." + this.options[2] +"\t"+ "d." + this.options[3]);
+        // ConsolePrinter.println(this.questionText + "    " + this.marks +"M");
+        // ConsolePrinter.println("a." + this.options[0] +"\t"+ "b." + this.options[1]);
+        // ConsolePrinter.println("c." + this.options[2] +"\t"+ "d." + this.options[3]);
     }
 
     // getters

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import util.AnimatedText;
 import util.DatabaseManager;
 import util.Timer;
+import util.ConsolePrinter;
 
 public class Exam implements Serializable{
     
@@ -212,36 +213,31 @@ public class Exam implements Serializable{
         });
 
         animate.animateText("""
-            === EXAM RULES AND INSTRUCTIONS ===
+            ### EXAM RULES
 
-            1. Time Management:
+            **Time Limit:**
             - You have %d minutes to complete this exam
-            - Timer will be displayed throughout the exam
             - Exam auto-submits when time expires
 
-            2. Answer Format:
-            - Enter only a, b, c, or d as your answer
-            - Invalid inputs will prompt for re-entry
-            - No negative marking
+            **Answer Format:**
+            - Enter only a, b, c, or d
+            - Invalid answers will require re-entry
 
-            3. Exam Conduct:
-            - One attempt per exam only
-            - No going back to previous questions
-
-            4. Scoring:
-            - Each question carries specified marks
-            - Pass mark is 35%% of total marks
-            - Results will be available immediately after submission
+            **Important Notes:**
+            - One attempt per exam
+            - No returning to previous questions
+            - Results available immediately after submission
+            - Dont press backspace, just re-type your option to change it
                 """.formatted(this.ExamDurationMinutes), 10);
-            animate.animateText("Total nuber of questions " + this.questionNum, 25);
-            animate.animateText("Total Marks " + this.totalMarks, 25);
-            animate.animateText("Press ENTER when you are ready to begin the exam. ", 25);
-            sc.nextLine();
-            examTimer.start();
+        animate.animateText("Total nuber of questions " + this.questionNum, 25);
+        animate.animateText("Total Marks " + this.totalMarks, 25);
+        animate.animateText("Press ENTER when you are ready to begin the exam. ", 25);
+        sc.nextLine();
         
+        examTimer.start();
         try {
             for (Question question : questions) {
-                if (examCompleted[0]) {  // Check array value
+                if (examCompleted[0]) {
                     break;
                 }
 
@@ -284,6 +280,11 @@ public class Exam implements Serializable{
             new DatabaseManager().saveExams(exams);
             new DatabaseManager().saveStudents(new DatabaseManager().loadStudents());
         }
+    }
+
+    public void stop() {
+        ConsolePrinter.println("Exam finished!");
+        // ...existing stop logic...
     }
     // getters
     public String getSubject(){ return this.examSubject; }

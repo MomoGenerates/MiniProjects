@@ -1,7 +1,7 @@
 package util;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Timer extends Thread {
     
@@ -24,8 +24,8 @@ public class Timer extends Thread {
     
     @Override
     public void run() {
+        System.out.println(); // Initial blank line for timer
         while (timeLimit > 0 && isRunning.get()) {
-            System.out.print("\r"); 
             String timeDisplay = formatTime(timeLimit);
             
             String color = GREEN; 
@@ -35,9 +35,7 @@ public class Timer extends Thread {
                 color = YELLOW;
             }
             
-            System.out.print(
-                "\r" + 
-            color + "Time Remaining: " + timeDisplay + RESET);
+            ConsolePrinter.printTimer(color + "Time Remaining: " + timeDisplay + RESET);
             
             try {
                 TimeUnit.SECONDS.sleep(1);
