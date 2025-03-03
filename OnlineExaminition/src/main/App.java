@@ -6,19 +6,17 @@ import models.*;
 import util.*;
 
 public class App {
-    private static String tempUser;
     private static DatabaseManager databaseManager;
-    private static Student currentStudent;
-    
     private static boolean userExist = false;
-    private static boolean validateUser = false;
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
+        AnimatedText animate = new AnimatedText();
         databaseManager = new DatabaseManager();
         
-        AnimatedText animate = new AnimatedText();
         while (true){
             List<Student> students = databaseManager.loadStudents();
+            List<Teacher> teachers = databaseManager.loadTeachers();
             System.out.println("\033[H\033[2J");
             animate.animateText("Welcome to Online Examination System ", 25);
             
@@ -26,52 +24,80 @@ public class App {
                 animate.animateText("Logging in ", 25);
                 animate.animateText("Are you a student or a Teacher ", 25);
                 String initialInput = sc.nextLine();
-                if(initialInput.equalsIgnoreCase("student")){
-                    animate.animateText("Enter your name ", 25);
-                    final String userName = tempUser = sc.nextLine();
-                    if (students.stream().noneMatch(user -> user.getName().equalsIgnoreCase(userName))) {
-                        animate.animateText("Student not found \nWould you like to make a Account ", 25);
-                        if(sc.nextLine().equalsIgnoreCase("yes")) {
-                            Student newStudent = new Student(sc,animate);
+                
+                if (initialInput.equalsIgnoreCase("student")) {
+                    animate.animateText("Enter your username: ", 25);
+                    String tempUser = sc.nextLine();
+                    
+                    Optional<Student> existingStudent = students.stream()
+                        .filter(student -> student.getName().equalsIgnoreCase(tempUser))
+                        .findFirst();
+                        
+                    existingStudent.ifPresentOrElse(
+                        student -> { 
+                            boolean validateUser = false;
+                        while (!validateUser) {
+                            animate.animateText("Enter your Password: ", 25);
+                            final String userPassword = sc.nextLine();
+                            
+                            if (student.authenticate(tempUser, userPassword)) {
+                                animate.animateText("Welcome " + tempUser, 25);
+                                validateUser = true;
+                                studentMenu(sc, animate, student);
+                            } else animate.animateText("Invalid Password ", 25);
+                        }
+                    },
+                    () -> {
+                        animate.animateText("Username not found. Would you like to create a new account?", 25);
+                        if (sc.nextLine().equalsIgnoreCase("Yes")) {
+                            Student newStudent = new Student(sc, animate);
                             students.add(newStudent);
                             databaseManager.saveStudents(students);
+                            studentMenu(sc, animate, newStudent);  
                         }
-                    } else userExist = true;
+                    }); 
                 } else if (initialInput.equalsIgnoreCase("teacher")){
-                    animate.animateText("Enter your name ", 25);
-                    final String userName = tempUser = sc.nextLine();
-                    if (students.stream().noneMatch(user -> user.getName().equalsIgnoreCase(userName))) {
-                        animate.animateText("Teacher not found \nWould you like to make a Account ", 25);
-                        if(sc.nextLine().equalsIgnoreCase("yes")) {
-                            Student newStudent = new Student(sc,animate,true);
-                            students.add(newStudent);
-                            databaseManager.saveStudents(students);
+                    animate.animateText("Enter your username: ", 25);
+                    String tempUser = sc.nextLine();
+                    
+                    Optional<Teacher> existingTeacher = teachers.stream()
+                        .filter(teacher -> teacher.getName().equalsIgnoreCase(tempUser))
+                        .findFirst();
+                        
+                    existingTeacher.ifPresentOrElse(
+                    teacher -> {
+                        boolean validateUser = false;
+                        while (!validateUser) {
+                            animate.animateText("Enter your Password: ", 25);
+                            final String userPassword = sc.nextLine();
+                            
+                            if (teacher.authenticate(tempUser, userPassword)) {
+                                animate.animateText("Welcome " + tempUser, 25);
+                                validateUser = true;
+                                teacherMenu(sc, animate, teacher);
+                            } else animate.animateText("Invalid Password ", 25);
                         }
-                    } else userExist = true;
-                }
-                else if(initialInput.equalsIgnoreCase("exit") || initialInput.equalsIgnoreCase("log out")) {
+                    },
+                    () -> {
+                        animate.animateText("Username not found. Would you like to create a new account?", 25);
+                        if (sc.nextLine().equalsIgnoreCase("Yes")) {
+                            Teacher newTeacher = new Teacher(sc, animate);
+                            teachers.add(newTeacher);
+                            databaseManager.saveTeachers(teachers);
+                            teacherMenu(sc, animate, newTeacher);
+                        }
+                    });
+
+                } else if (initialInput.equalsIgnoreCase("exit") || initialInput.equalsIgnoreCase("log out")) {
                     databaseManager.saveStudents(students);
                     databaseManager.saveExams(databaseManager.loadExams());
                     System.exit(0);
                 }
             }
-
-            while(!validateUser){
-                animate.animateText("Enter your Password ", 25);
-                final String userPassword = sc.nextLine();
-                if (students.stream().anyMatch(user -> { if(user.getName().equalsIgnoreCase(tempUser) && user.getPassword().equals(userPassword)){
-                    currentStudent = user; return true;} return false;})) {
-                    animate.animateText("Welcome "+tempUser, 25);
-                    validateUser = true;
-                } else animate.animateText("Invalid Password ", 25);
-            }
-
-            if (currentStudent.isTeacher()) teacherMenu(sc, animate);
-            else studentMenu(sc, animate);
         }
     }
 
-    public static void studentMenu(Scanner sc, AnimatedText animate){
+    public static void studentMenu(Scanner sc, AnimatedText animate, Student currentStudent){
         List<Exam> exams = databaseManager.loadExams();
         List<Student> students = databaseManager.loadStudents();
 
@@ -86,6 +112,7 @@ public class App {
         while(true){
             animate.animateText("Enter the command ", 25);
             String operation = sc.nextLine().toLowerCase();
+
             switch(operation){
                 case "update profile", "update" ->{
                     currentStudent.displayStudentDetails(animate);
@@ -103,27 +130,27 @@ public class App {
                             case "name" ->{
                                 animate.animateText("Enter the new Name ", 25);
                                 currentStudent.setName(sc.nextLine());
-                                databaseManager.saveStudents(students);  // Add save
+                                databaseManager.saveStudents(students);
                             }
                             case "email" ->{
                                 animate.animateText("Enter the new Email ", 25);
                                 currentStudent.setEmail(sc.nextLine());  
-                                databaseManager.saveStudents(students);  // Add save
+                                databaseManager.saveStudents(students);
                             }
                             case "phone" ->{
                                 animate.animateText("Enter the new Phone Number ", 25);
-                                currentStudent.setPhoneNumber(sc.nextLine());  
-                                databaseManager.saveStudents(students);  // Add save
+                                currentStudent.setPhone(sc.nextLine());  
+                                databaseManager.saveStudents(students);
                             }
                             case "dept" ->{
                                 animate.animateText("Enter the new Department ", 25);
-                                currentStudent.setDept(sc.nextLine());  
-                                databaseManager.saveStudents(students);  // Add save
+                                currentStudent.setStudentDept(sc.nextLine());  
+                                databaseManager.saveStudents(students);
                             }
                             case "sem" ->{
                                 animate.animateText("Enter the new Semester ", 25);
-                                currentStudent.setSem(sc.nextInt());sc.nextLine();
-                                databaseManager.saveStudents(students);  // Add save
+                                currentStudent.setStudentSem(sc.nextInt());sc.nextLine();
+                                databaseManager.saveStudents(students);
                             }
                             case "exit", "back" ->{
                                 break;
@@ -138,21 +165,18 @@ public class App {
                     exam.getExamSem() == currentStudent.getStudentSem())
                     .collect(Collectors.toList());
 
-                    if (availableExams.isEmpty())
-                        animate.animateText("No available exams", 25);
+                    if (availableExams.isEmpty()) animate.animateText("No available exams", 25);
                     else {
-                        animate.animateText("Available exams to take", 25);
+                        animate.animateText("Available exams to take ~", 25);
                         animate.animateText(String.format("%-10s %-15s %-15s %-20s %-6s",
                             "Exam ID", "Subject", "Total Marks", "Teacher", "Time"), 25);
 
                         availableExams.forEach(exam -> 
                             animate.animateText(String.format("%-10s %-15s %-15s %-20s %-6s",
                                             exam.getExamID(), exam.getSubject(), exam.getTotalMarks(), 
-                                            exam.getCreatedBy(), exam.getExamTime() + " min"), 25)
-                        );
+                                            exam.getCreatedBy(), exam.getExamTime() + " min"), 25));
 
                         animate.animateText("Enter the ID of exam you'd like to take ", 25);
-
                         availableExams.stream()
                             .filter(exam -> exam.getExamID().equalsIgnoreCase(sc.nextLine()))
                             .findFirst()
@@ -184,7 +208,7 @@ public class App {
                             if(newPassword.equals(newPassword)){
                                 currentStudent.setPassword(newPassword);
                                 databaseManager.saveStudents(students);
-                            }  // Add save
+                            }
                         } else {
                             animate.animateText("Wrong Password", 25);
                             PasswordLimit++;
@@ -196,7 +220,8 @@ public class App {
                     databaseManager.saveStudents(students);
                     databaseManager.saveExams(exams);
                     animate.animateText("Logging out ", 25);
-                    validateUser = userExist = false;
+                    userExist = false;
+                    System.out.println("\033[H\033[2J");
                     return;
                 }
                 default -> animate.animateText("Invalid input", 25);
@@ -204,9 +229,10 @@ public class App {
         }
     }
 
-    public static void teacherMenu(Scanner sc, AnimatedText animate){
-        List<Exam> exams = databaseManager.loadExams();
+    public static void teacherMenu(Scanner sc, AnimatedText animate, Teacher currentTeacher){
+        List<Teacher> teachers = databaseManager.loadTeachers();
         List<Student> students = databaseManager.loadStudents();
+        List<Exam> exams = databaseManager.loadExams();
 
         animate.animateText("""
                             ===== Teacher Menu =====
@@ -221,9 +247,10 @@ public class App {
         while (true) { 
             animate.animateText("Enter the command ", 25);
             String operation = sc.nextLine().toLowerCase();
+
             switch(operation){
                 case "update profile", "update" ->{
-                    currentStudent.displayStudentDetails(animate);
+                    currentTeacher.displayTeacherDetails(animate);
                     animate.animateText("""
                             === Update Profile ===
                             \u2192 Update Full Name
@@ -236,23 +263,23 @@ public class App {
                         switch(sc.nextLine()){
                             case "name" ->{
                                 animate.animateText("Enter the new Name ", 25);
-                                currentStudent.setName(sc.nextLine());
-                                databaseManager.saveStudents(students);  // Add save
+                                currentTeacher.setName(sc.nextLine());
+                                databaseManager.saveTeachers(teachers);  
                             }
                             case "email" ->{
                                 animate.animateText("Enter the new Email ", 25);
-                                currentStudent.setEmail(sc.nextLine());  
-                                databaseManager.saveStudents(students);  // Add save
+                                currentTeacher.setEmail(sc.nextLine());  
+                                databaseManager.saveTeachers(teachers);
                             }
                             case "phone" ->{
                                 animate.animateText("Enter the new Phone Number ", 25);
-                                currentStudent.setPhoneNumber(sc.nextLine());  
-                                databaseManager.saveStudents(students);  // Add save
+                                currentTeacher.setPhone(sc.nextLine());  
+                                databaseManager.saveTeachers(teachers);
                             }
                             case "dept" ->{
                                 animate.animateText("Enter the new Department ", 25);
-                                currentStudent.setDept(sc.nextLine());  
-                                databaseManager.saveStudents(students);  // Add save
+                                currentTeacher.setTeacherDept(sc.nextLine());  
+                                databaseManager.saveTeachers(teachers);
                             }
                             case "exit", "back" ->{
                                 break;
@@ -262,15 +289,16 @@ public class App {
                     }
                 }
                 case "new exam", "create exam" ->{
-                    Exam newExam = new Exam(sc, animate, currentStudent);
+                    Exam newExam = new Exam(sc, animate, currentTeacher);
                     newExam.createExam(sc, animate);
                     exams.add(newExam);
                     databaseManager.saveExams(exams);
                 }
                 case "manage", "manage questions" ->{
                     List<Exam> filteredExams = exams.stream()
-                        .filter(exam -> exam.getCreatedBy().equalsIgnoreCase(currentStudent.getName()))
+                        .filter(exam -> exam.getCreatedBy().equalsIgnoreCase(currentTeacher.getName()))
                         .collect(Collectors.toList());
+
                     animate.animateText("Available Exams ", 25);
                     filteredExams.forEach(exam -> animate.animateText(exam.getSubject(), 25));
                     animate.animateText("Enter the Exam to manage ", 25);
@@ -292,17 +320,17 @@ public class App {
                                     case "add" ->{
                                         exam.addQuestion(sc, animate);
                                         animate.animateText("Successfully added Question ", 25);
-                                        databaseManager.saveExams(exams);  // Add save
+                                        databaseManager.saveExams(exams); 
                                     }
                                     case "update" ->{
                                         exam.updateQuestion(sc, animate);
                                         animate.animateText("Successfully updated Question ", 25);
-                                        databaseManager.saveExams(exams);  // Add save
+                                        databaseManager.saveExams(exams);  
                                     }
                                     case "delete" ->{
                                         exam.deleteQuestion(sc, animate);
                                         animate.animateText("Successfully deleted Question ", 25);
-                                        databaseManager.saveExams(exams);  // Add save
+                                        databaseManager.saveExams(exams); 
                                     }
                                     case "exit", "back" ->{
                                         break;
@@ -312,41 +340,40 @@ public class App {
                                 exam.displayQuestions(animate);
                             }
                         },
-                        () -> animate.animateText("Wrong Exam ID", 25)
+                        () -> animate.animateText("Wrong Exam ", 25)
                         );
                 }
                 case "results report", "generate reulsts report" ->{
                     List<Exam> filteredExams = exams.stream()
-                        .filter(exam -> exam.getCreatedBy().equalsIgnoreCase(currentStudent.getName()))
+                        .filter(exam -> exam.getCreatedBy().equalsIgnoreCase(currentTeacher.getName()))
                         .collect(Collectors.toList());
-                    filteredExams.forEach(exam -> 
-                        animate.animateText(String.format("%-10s %-20s", 
-                            exam.getExamID(), 
-                            exam.getSubject()), 25)
-                    );
-                    animate.animateText("Enter Exam ID", 25);
-                    exams.stream()
-                        .filter(exam -> exam.getExamID().equalsIgnoreCase(sc.nextLine()))
-                        .findFirst()
-                        .ifPresentOrElse(exam -> exam.resultsReport(animate),
-                        () -> animate.animateText("Exam not found!", 25)
+                    if(filteredExams.isEmpty())  animate.animateText("No avaliable exams", 25);
+                    else {
+                        filteredExams.forEach(exam -> 
+                            animate.animateText(String.format("%-10s %-20s", 
+                                exam.getExamID(), 
+                                exam.getSubject()), 25)
                         );
+                        animate.animateText("Enter Exam ID", 25);
+                        exams.stream()
+                            .filter(exam -> exam.getExamID().equalsIgnoreCase(sc.nextLine()))
+                            .findFirst()
+                            .ifPresentOrElse(exam -> exam.resultsReport(animate),
+                            () -> animate.animateText("Exam not found!", 25)
+                        );
+                    }
                 }
 
                 case "student result", "view student results" ->{
                     animate.animateText(String.format("%-12s  %-20s  %-12s  %-10s", "Student ID", "Name", "Department", "Semester"), 25);
-                    students.stream()
-                        .filter(student -> student.isTeacher() != true)
-                        .forEach(student -> animate.animateText(String.format("%-12s  %-20s  %-12s  %-10s",
+                    students.forEach(student -> animate.animateText(String.format("%-12s  %-20s  %-12s  %-10s",
                             student.getStudentID(), 
                             student.getName(), 
-                            student.getDept(), 
+                            student.getStudentDept(), 
                             student.getStudentSem()), 25));
                     animate.animateText("Enter the Student ID to view results", 25);
-                    String studentID = sc.nextLine();
                     students.stream()
-                        .filter(student -> student.isTeacher() != true)
-                        .filter(student -> student.getStudentID().equalsIgnoreCase(studentID))
+                        .filter(student -> student.getStudentID().equalsIgnoreCase(sc.nextLine()))
                         .findFirst()
                         .ifPresentOrElse(exam -> exam.displayResults(animate, exams),
                         () -> animate.animateText("Student not found!", 25)
@@ -354,8 +381,12 @@ public class App {
                 }
                 case "set timer", "timer" ->{
                     List<Exam> filteredExams = exams.stream()
-                        .filter(exam -> exam.getCreatedBy().equalsIgnoreCase(currentStudent.getName()))
+                        .filter(exam -> exam.getCreatedBy().equalsIgnoreCase(currentTeacher.getName()))
                         .collect(Collectors.toList());
+                        if(filteredExams.isEmpty()){
+                            animate.animateText("No avaliable exams", 25);
+                            break;
+                        }
                     animate.animateText(String.format("%-15s %-10s", "Exam Subject", "Exam time"), 25);
                     filteredExams.forEach(exam -> animate.animateText(String.format("%-15s %-10s",
                         exam.getSubject(), exam.getExamTime()), 25));
@@ -374,7 +405,7 @@ public class App {
                     int PasswordLimit = 0;
                     while(!correctPassword && PasswordLimit <4){
                         animate.animateText("Enter old Password", 25);
-                        if(currentStudent.getPassword().equals(sc.nextLine())){
+                        if(currentTeacher.getPassword().equals(sc.nextLine())){
                             correctPassword = true;
                             boolean validPassword;
                             String newPassword;
@@ -386,9 +417,9 @@ public class App {
                                 } while(validPassword);
                             animate.animateText("Confirm New Password", 25);
                             if(newPassword.equals(newPassword)) {
-                                currentStudent.setPassword(newPassword);
+                                currentTeacher.setPassword(newPassword);
                                 databaseManager.saveStudents(students);
-                            }  // Add save
+                            } 
                         } else {
                             animate.animateText("Wrong Password", 25);
                             PasswordLimit++;
@@ -400,7 +431,8 @@ public class App {
                     databaseManager.saveStudents(students);
                     databaseManager.saveExams(exams);
                     animate.animateText("Logging out ", 25);
-                    validateUser = userExist = false;
+                    userExist = false;
+                    System.out.println("\033[H\033[2J");
                     return;
                 }
                 default -> animate.animateText("Invalid input", 25);

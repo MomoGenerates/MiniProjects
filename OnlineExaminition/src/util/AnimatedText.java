@@ -3,6 +3,7 @@ package util;
 import java.util.concurrent.TimeUnit;
 
 public class AnimatedText {
+    
     public void animateText(String text, int delay) {
         for (int i = 0; i < text.length(); i++) {
             System.out.print(text.charAt(i));
@@ -20,7 +21,7 @@ public class AnimatedText {
         }  
     }
 
-    public void animatedText(String text, int delay) {
+    public void animateTextNoln(String text, int delay) {
         for (int i = 0; i < text.length(); i++) {
             System.out.print(text.charAt(i));
             try {

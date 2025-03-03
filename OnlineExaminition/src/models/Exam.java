@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import util.AnimatedText;
 import util.DatabaseManager;
 import util.Timer;
-import util.ConsolePrinter;
 
 public class Exam implements Serializable{
     
@@ -16,16 +15,15 @@ public class Exam implements Serializable{
     private String examSubject;
     private final int examSem;
     private final String createdBy;
-    // private final String examCreated;
     private int questionNum;
     private int totalMarks = 0;
     private int ExamDurationMinutes;
     private final List<Question> questions;   
-    private final List<String> attemptTracker;//studetn ID
+    private final List<String> attemptTracker; // student ID
     
     List<Exam> exams = new DatabaseManager().loadExams();
 
-    public Exam(Scanner sc, AnimatedText animate, Student teacher){
+    public Exam(Scanner sc, AnimatedText animate, Teacher teacher){
         boolean isDuplicate;
         animate.animateText("Enter Semester ", 25);
         this.examSem = sc.nextInt(); sc.nextLine();
@@ -38,13 +36,11 @@ public class Exam implements Serializable{
                 animate.animateText("You have already created an exam on this subject", 25);
             }
         } while (isDuplicate);
-                animate.animateText("Enter Exam Duration (In Minutes)", 25);
+        animate.animateText("Enter Exam Duration (In Minutes)", 25);
         this.ExamDurationMinutes = sc.nextInt();sc.nextLine();
         animate.animateText("Enter the Number of questions ", 25);
         this.questionNum = sc.nextInt();sc.nextLine();
         this.examID = this.ExamIDInitialize();
-        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
-        // this.examCreated = LocalDateTime.now().format(formatter);
         this.createdBy = teacher.getName();
         this.questions = new ArrayList<>(); 
         this.attemptTracker = new ArrayList<>();
@@ -57,7 +53,7 @@ public class Exam implements Serializable{
         return this.examSubject.substring(0, 4).toUpperCase() + formattedId;
     }
 
-    public final boolean checkDuplicateExam(Student teacher, String subject){
+    public final boolean checkDuplicateExam(Teacher teacher, String subject){
         return exams.stream()
             .filter(exam -> exam.getCreatedBy().equalsIgnoreCase(teacher.getName()) && 
                 exam.getExamSem() == this.examSem)
@@ -84,7 +80,7 @@ public class Exam implements Serializable{
 
         List<Integer> marksList = students.stream()
             .filter(student -> attemptSet.contains(student.getStudentID()))
-            .map(student -> student.getExamMark(this.examID))
+            .map(student -> student.getMarks(this.examID))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
@@ -241,14 +237,16 @@ public class Exam implements Serializable{
                     break;
                 }
 
+                examTimer.waitForQuestion();
                 System.out.println("\nQuestion " + (questionsAnswered + 1) + " of " + questions.size());
                 question.displayQuestion(animate);
+                examTimer.resumeTimer();
+                System.out.println();
                 
                 String answer = "";
                 boolean validAnswer = false;
                 
                 while (!validAnswer && !examCompleted[0]) {
-                    animate.animateText("Enter your answer (a/b/c/d): ", 25);
                     try {
                         answer = sc.nextLine().toLowerCase();
                         validAnswer = answer.matches("[a-d]");
@@ -257,15 +255,14 @@ public class Exam implements Serializable{
                     }
                 }
                 
-                if (!examCompleted[0] && question.validateAnswer(answer)) {
+                if (!examCompleted[0] && question.validateAnswer(answer))
                     examMarks += question.getMarks();
-                }
+                
                 questionsAnswered++;
             }
         } finally {
             examTimer.stopTimer();
             
-            // Calculate and display results
             double percentage = (examMarks * 100.0) / totalMarks;
             
             animate.animateText("\n=== Exam Completed ===", 25);
@@ -274,7 +271,6 @@ public class Exam implements Serializable{
             animate.animateText(String.format("Percentage: %.2f%%", percentage), 25);
             animate.animateText("Result: " + (percentage >= 35 ? "PASS" : "FAIL"), 25);
 
-            // Save results
             student.setMarks(this.examID, examMarks);
             attemptTracker.add(student.getStudentID());
             new DatabaseManager().saveExams(exams);
@@ -282,10 +278,6 @@ public class Exam implements Serializable{
         }
     }
 
-    public void stop() {
-        ConsolePrinter.println("Exam finished!");
-        // ...existing stop logic...
-    }
     // getters
     public String getSubject(){ return this.examSubject; }
     public String getCreatedBy(){ return this.createdBy; }

@@ -3,7 +3,6 @@ package models;
 import java.io.Serializable;
 import java.util.Scanner;
 import util.AnimatedText;
-import util.ConsolePrinter;
 
 public class Question implements Serializable {
 
@@ -32,19 +31,17 @@ public class Question implements Serializable {
         return this.correctAnswer.equalsIgnoreCase(answer);
     }
 
-    public synchronized void displayQuestion(AnimatedText animate){
-        ConsolePrinter.println("\n" + this.questionText + "    " + this.marks +"M" +
-        "\na." + this.options[0] +"\t"+ "b." + this.options[1] +
-        "\nc." + this.options[2] +"\t"+ "d." + this.options[3]);
-        // ConsolePrinter.println(this.questionText + "    " + this.marks +"M");
-        // ConsolePrinter.println("a." + this.options[0] +"\t"+ "b." + this.options[1]);
-        // ConsolePrinter.println("c." + this.options[2] +"\t"+ "d." + this.options[3]);
+    public void displayQuestion(AnimatedText animate) {
+        animate.animateText(this.questionText + "\t" + this.marks + "M", 25);
+        animate.animateText(String.format("a. %-20s b. %-20s", options[0], options[1]), 25);
+        animate.animateText(String.format("c. %-20s d. %-20s", options[2], options[3]), 25);
+        animate.animateText(("Enter your answer (a/b/c/d): "), 25);
     }
 
     // getters
     public int getMarks(){ return this.marks; }
 
-    //setters
+    // setters
     public void setQuestion(String question){ this.questionText = question; }
     public void setAnswer(String answer){ this.correctAnswer = answer; }
     public void setMarks(int marks){ this.marks = marks; }

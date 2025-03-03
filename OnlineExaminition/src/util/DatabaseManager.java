@@ -8,6 +8,7 @@ import models.*;
 public class DatabaseManager {
     private static final String DB_FOLDER = "database/";
     private static final String STUDENT_FILE = DB_FOLDER + "student.dat";
+    private static final String TEACHER_FILE = DB_FOLDER + "teacher.dat";
     private static final String QUESTIONS_FILE = DB_FOLDER + "exams.dat";
     
     static {
@@ -29,6 +30,26 @@ public class DatabaseManager {
         try (ObjectInputStream ois = new ObjectInputStream(
                 new FileInputStream(STUDENT_FILE))) {
             return (List<Student>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            return new ArrayList<>(); 
+        }
+    }
+
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void saveTeachers(List<Teacher> Teachers) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(TEACHER_FILE))) {
+            oos.writeObject(Teachers);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Teacher> loadTeachers() {
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new FileInputStream(TEACHER_FILE))) {
+            return (List<Teacher>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             return new ArrayList<>(); 
         }
